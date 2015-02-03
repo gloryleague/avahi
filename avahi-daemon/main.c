@@ -689,6 +689,17 @@ static int load_config_file(DaemonConfig *c) {
                         c->server_config.allow_interfaces = avahi_string_list_add(c->server_config.allow_interfaces, *t);
 
                     avahi_strfreev(e);
+                } else if (strcasecmp(p->key, "deny-ipv4-addresses") == 0) {
+                    char **e, **t;
+
+                    avahi_string_list_free(c->server_config.deny_ipv4_addresses);
+                    c->server_config.deny_ipv4_addresses = NULL;
+                    e = avahi_split_csv(p->value);
+
+                    for (t = e; *t; t++)
+                        c->server_config.deny_ipv4_addresses = avahi_string_list_add(c->server_config.deny_ipv4_addresses, *t);
+
+                    avahi_strfreev(e);
                 } else if (strcasecmp(p->key, "deny-interfaces") == 0) {
                     char **e, **t;
 

@@ -698,7 +698,22 @@ good:
 
 int avahi_interface_address_is_relevant(AvahiInterfaceAddress *a) {
     AvahiInterfaceAddress *b;
+    AvahiStringList *l;
     assert(a);
+
+    for (l = a->interface->monitor->server->config.deny_ipv4_addresses; l; l = l->next) {
+        AvahiAddress address;
+        char *address_string = (char *) l->text;
+
+        if (avahi_address_parse(address_string, AVAHI_PROTO_INET, &address)) {
+            if (avahi_address_cmp(&address, &a->address) == 0) {
+                avahi_log_info("Excluding IPv4 address %s", address_string);
+                return 0;
+            }
+        } else {
+            avahi_log_warn("Failed to parse address %s.", address_string);
+        }
+    }
 
     /* Publish public and non-deprecated IP addresses */
     if (a->global_scope && !a->deprecated)
